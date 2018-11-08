@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# File              : freesurfer.py
+# Author            : Akshara Balachandra <abalacha@ucsd.edu>
+# Date              : 07.11.2018
+# Last Modified Date: 07.11.2018
+# Last Modified By  : Akshara Balachandra <abalacha@ucsd.edu>
 import nibabel
 
 class Freesurfer(object):
@@ -30,15 +37,20 @@ class Freesurfer(object):
         self.wm_lut = _def_wm_lut()
         self.wm_mask = None
 
-def load(freesurfer_dir, gm_lut=None, wm_lut=None):
+def load(freesurfer_dir, gm_lut=None, wm_lut=None, aparcaseg_file=None):
     """Return an instance of our Freesurfer atlas class"""
-    newAtlas = Freesurfer()    
+    newAtlas = Freesurfer()
     # load new atlas starting from aparc+aseg.mgz
     #############################################
     # convert mgz files to nii.gz files
     from os.path import join
+    aa_file = 'aparc+aseg.mgz'
+
+    if aparcaseg_file:
+        aa_file = aparcaseg_file
+
     aparc_aseg = _convert_mgz_to_niigz_and_load(join(freesurfer_dir,
-                                                     'mri/aparc+aseg.mgz'))
+                                                     'mri/%s' % aa_file))
     aparc_aseg_data = aparc_aseg.get_data()
     # load any custom luts
     ######################
@@ -64,7 +76,7 @@ def load(freesurfer_dir, gm_lut=None, wm_lut=None):
         nibabel.nifti1.Nifti1Image(wm_data, aparc_aseg.get_affine() ,
                                    aparc_aseg.get_header()), freesurfer_dir)
     return newAtlas
-    
+
 def _convert_mgz_to_niigz_and_load(filepath):
     """Return the given mgz file as a nii loaded and wrapped in
     nibabel
@@ -141,7 +153,7 @@ def _def_wm_lut():
         print e
         return None
     return read_lut
-    
+
 def _reorient_fs_to_orig(input_img, freesurfer_dir):
     """Freesurfer outputs images in its own space, this utility
     re-samples to dims found in first image in orig folder.
@@ -158,7 +170,7 @@ def _reorient_fs_to_orig(input_img, freesurfer_dir):
     import os.path as op
     from os import listdir
     import subprocess
-    import tempfile    
+    import tempfile
     search_path = op.join(freesurfer_dir, 'mri/orig')
     found_files = listdir(search_path)
     found_files.sort()
@@ -186,5 +198,5 @@ def _reorient_fs_to_orig(input_img, freesurfer_dir):
             rmtree(tmpdir)
         except:
             pass
-    
-    
+
+
