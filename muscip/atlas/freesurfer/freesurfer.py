@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# File              : freesurfer.py
+# File              : muscip/atlas/freesurfer/freesurfer.py
 # Author            : Akshara Balachandra <abalacha@ucsd.edu>
 # Date              : 07.11.2018
-# Last Modified Date: 07.11.2018
+# Last Modified Date: 08.11.2018
 # Last Modified By  : Akshara Balachandra <abalacha@ucsd.edu>
 import nibabel
 
@@ -55,7 +55,7 @@ def load(freesurfer_dir, gm_lut=None, wm_lut=None, aparcaseg_file=None):
     # load any custom luts
     ######################
     if gm_lut:
-        newAtlas.gm_lut = gm_lut
+        newAtlas.gm_lut = read_lut(gm_lut)
     if wm_lut:
         newAtlas.wm_lut = wm_lut
     # map fs labels to expected labels
@@ -109,14 +109,14 @@ def _convert_mgz_to_niigz_and_load(filepath):
         except:
             pass
 
-def _def_gm_lut():
+def read_lut(lut_file):
     """Returnt the path to default grey matter lookup table"""
     try:
         import pkgutil
-        data = pkgutil.get_data(__name__, 'data/freesurfer_gm_lut.txt')
+        data = pkgutil.get_data(__name__, lut_file)
     except ImportError:
         import pkg_resources
-        data = pkg_resources.resource_string(__name__, 'data/freesurfer_gm_lut.txt')
+        data = pkg_resources.resource_string(__name__, lut_file)
     read_lut = []
     try:
         for line in data.split('\n'):
@@ -127,6 +127,10 @@ def _def_gm_lut():
         print e
         return None
     return read_lut
+
+def _def_gm_lut():
+    """Returnt the path to default grey matter lookup table"""
+    return read_lut('data/freesurfer_gm_lut.txt')
 
 def _def_node_info():
     """Return node info as networkx object with data for each node"""
